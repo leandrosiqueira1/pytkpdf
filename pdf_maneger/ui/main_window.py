@@ -8,8 +8,6 @@ import tabula
 from pdf2docx import Converter
 import os
 
-
-
 class MainWindow:
     def __init__(self):
         self.root = tk.Tk()
@@ -70,8 +68,8 @@ class MainWindow:
     # Funções de exemplo para cada botão
 
     def _acao_juntar(self):
-             """Seleciona multiplos PDFs e Junta  em um arquivo"""
-        arquivos = filedialog.askopenfilename(title="Selecione os arquivos PDF", filetypes=[("*.pdf")], multiple=True)
+        """Seleciona multiplos PDFs e Junta  em um arquivo"""
+        arquivos = filedialog.askopenfilenames(title="Selecione os arquivos PDF", filetypes=[("Arquivos PDF","*.pdf")], multiple=True)
         if not arquivos:
             return
         try:
@@ -79,9 +77,12 @@ class MainWindow:
             for pdf in arquivos:
                 merger.append(pdf)
             salvar_como = filedialog.asksaveasfilename(title="Salvar PDF unificado",defaultextension=".pdf", filetypes=[("Arquivos PDF","*.pdf"),])
-        messagebox.showinfo("Sucesso",f"PDF salvo com sucesso:\n"{salva_como})
-        
-
+            if salvar_como:
+                merger.write(salvar_como)
+                merger.close()
+            messagebox.showinfo("Sucesso",f"PDF salvo com sucesso:\n{salvar_como}")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao juntar PDFs:\n{e}")
         
     def _acao_separar(self):
         pass
@@ -117,7 +118,22 @@ class MainWindow:
 
 
     def _acao_word(self):
-        messagebox.showinfo("Ação", "Função de conversão para Word em construção.")
+        """Converte PDF para word (.docx)"""
+        caminho_pdf = filedialog.askopenfilename(title="Selecione o PDF", filetypes=[("Arquivos PDF", "*.pdf")])
+        if not caminho_pdf:
+            return
+        salvar_como = filedialog.asksaveasfilename(title="Salva como word", defaultextension=".docx",filetypes=[("Documento WOrd", "*.docx")])
+        if not salvar_como:
+            return 
+        try:
+            converter = Converter(caminho_pdf)
+            converter.convert(salvar_como,start=0,end=None)
+            converter.close()
+            messagebox.showinfo("SUcesso", f"PDF convertido com sucesso para:\n{salvar_como}")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao converte PDF para word: \n{e}")
+           
+
 
     def _acao_excel(self):
         messagebox.showinfo("Ação", "Função de conversão para Excel em construção.")
