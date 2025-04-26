@@ -136,7 +136,42 @@ class MainWindow:
 
 
     def _acao_excel(self):
-        messagebox.showinfo("Ação", "Função de conversão para Excel em construção.")
+        """Extrai tabelas do PDF e salva como Excel (.xlsx)"""
+        caminho_pdf = filedialog.askopenfilename(
+            title="Selecione o PDF com tabelas",
+            filetypes=[("Arquivos PDF", "*.pdf")]
+        )
+
+        if not caminho_pdf:
+            return
+
+        salvar_como = filedialog.asksaveasfilename(
+            title="Salvar como Excel",
+            defaultextension=".xlsx",
+            filetypes=[("Planilha Excel", "*.xlsx")]
+        )
+
+        if not salvar_como:
+            return
+
+        try:
+            # extração de todas as tabelas
+            tabelas = tabula.read_pdf(caminho_pdf, pages='all', multiple_tables=True)
+
+            if not tabelas:
+                messagebox.showwarning("Aviso", "Nenhuma tabela encontrada no PDF.")
+                return
+
+            with pd.ExcelWriter(salvar_como, engine='openpyxl') as writer:
+                for i, tabela in enumerate(tabelas):
+                    tabela.to_excel(writer, sheet_name=f'Tabela_{i+1}', index=False)
+
+            messagebox.showinfo("Sucesso", f"Tabelas salvas em:\n{salvar_como}")
+
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao converter PDF para Excel:\n{e}")
+                                    
+
 
     def run(self):
         self.root.mainloop()
